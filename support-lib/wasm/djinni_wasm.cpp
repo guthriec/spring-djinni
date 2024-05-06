@@ -16,6 +16,9 @@
 
 #include "djinni_wasm.hpp"
 
+#include <iostream>
+//#include <stacktrace>
+
 namespace djinni {
 
 Binary::CppType Binary::toCpp(const JsType& j) {
@@ -115,7 +118,9 @@ void releaseWasmBuffer(unsigned addr) {
 }
 
 EM_JS(void, djinni_init_wasm, (), {
-        // console.log("djinni_init_wasm");
+        //console.log("djinni_init_wasm");
+
+        //std::cout << std::stacktrace::current() << '\n';
         Module.cppProxyFinalizerRegistry = new FinalizationRegistry(nativeRef => {
             // console.log("finalizing cpp object @" + nativeRef);
             nativeRef.nativeDestroy();
@@ -174,6 +179,7 @@ EM_JS(void, djinni_init_wasm, (), {
         };
 
         Module.callJsProxyMethod = function(obj, method, ...args) {
+            console.log("in callJsProxyMethod");
             try {
                 return obj[method].apply(obj, args);
             } catch (e) {
@@ -212,7 +218,8 @@ void djinni_throw_native_exception(const std::exception& e) {
 }
 
 EMSCRIPTEN_BINDINGS(djinni_wasm) {
-    djinni_init_wasm();    
+    //printf("hellloooooo12345654321 \n");
+    djinni_init_wasm();
     em::function("allocateWasmBuffer", &allocateWasmBuffer);
     em::function("initCppResolveHandler", &CppResolveHandlerBase::initInstance);
     em::function("resolveNativePromise", &CppResolveHandlerBase::resolveNativePromise);

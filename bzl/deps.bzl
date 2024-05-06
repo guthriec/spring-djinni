@@ -24,14 +24,14 @@ def djinni_deps():
         url = "https://github.com/bazelbuild/rules_scala/archive/{}.zip".format(rules_scala_version),
         sha256 = "76e1abb8a54f61ada974e6e9af689c59fd9f0518b49be6be7a631ce9fa45f236",
     )    
-    protobuf_version = "3.12.4"
-    maybe(
-        name = "com_google_protobuf",
-        repo_rule = http_archive,
-        url = "https://github.com/protocolbuffers/protobuf/archive/v{}.tar.gz".format(protobuf_version),
-        strip_prefix = "protobuf-{}".format(protobuf_version),
-        sha256 = "512e5a674bf31f8b7928a64d8adf73ee67b8fe88339ad29adaa3b84dbaa570d8",
-    )
+    #protobuf_version = "3.12.4"
+    #maybe(
+    #    name = "com_google_protobuf",
+    #    repo_rule = http_archive,
+    #    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.tar.gz".format(protobuf_version),
+    #    strip_prefix = "protobuf-{}".format(protobuf_version),
+    #    sha256 = "512e5a674bf31f8b7928a64d8adf73ee67b8fe88339ad29adaa3b84dbaa570d8",
+    #)
 
     rules_jvm_external_tag = "3.0"
     maybe(

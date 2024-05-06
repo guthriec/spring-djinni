@@ -6,6 +6,9 @@ cc_library(
     srcs = glob(["cpp/*.cpp"]),
     hdrs = glob(["*.hpp", "cpp/*.hpp"]),
     includes = ["cpp"],
+    copts = [
+      "-pthread",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -65,6 +68,7 @@ cc_library(
     visibility = ["//visibility:public"],
     copts = [
         "-fexceptions",
+        "-pthread",
     ],
     deps = [
         "//support-lib:djinni-support-common",

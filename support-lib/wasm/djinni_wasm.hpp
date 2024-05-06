@@ -254,15 +254,30 @@ public:
     static em::val resolve() {
         static em::val cls = [] {
             std::string name = {chars...};
-            em::val ns = em::val::module_property("protobuf");
+            std::optional<em::val> ns = em::val::module_property("protobuf");
             std::string::size_type i = 0;
             std::string::size_type j = name.find('.', i);
+            //std::optional<em::val> ns = std::nullopt;
+            //printf("heeeere\n");
             while (j != std::string::npos) {
-                ns = ns[name.substr(i, j - i)];
+                std::string next_string = name.substr(i, j - i);
+                //printf("next string: %s\n", next_string.c_str());
+                if (ns.has_value()) {
+                    //printf("ns has value\n");
+                    ns = ns.value()[next_string];
+                    //printf("ns assigned\n");
+                } else {
+                    ns = em::val::module_property(next_string.c_str());
+                }
                 i = j + 1;
                 j = name.find('.', i);
             }
-            return ns[name.substr(i)];
+            //printf("final string: %s\n", name.substr(i).c_str());
+            if (ns.has_value()) {
+                return ns.value()[name.substr(i)];
+            }
+            //printf("final string 2: %s\n", name.substr(i).c_str());
+            return em::val::module_property(name.substr(i).c_str());
         }();
         return cls;
     }
@@ -297,14 +312,17 @@ public:
         
     static JsType fromCpp(const CppType& c)
     {
+        //printf("in from cpp\n");
         std::vector<uint8_t> cbuf(c.ByteSizeLong());
         c.SerializeToArray(cbuf.data(), static_cast<int>(cbuf.size()));
-
+        //printf("have serialized\n");
         unsigned addr = reinterpret_cast<unsigned>(cbuf.data());
         unsigned size = static_cast<unsigned>(cbuf.size());
         static auto uint8ArrayClass = em::val::global("Uint8Array");
         em::val array = uint8ArrayClass.new_(::djinni::getWasmMemoryBuffer(), addr, size);
+        //printf("before resolve\n");
         em::val jsClass = JsProto::resolve();
+        //printf("before call\n");
         return jsClass.call<em::val>("decode", array);
     }
 };
@@ -399,6 +417,7 @@ public:
 
     static void initInstance(int handlerPtr, em::val resolveFunc, em::val rejectFunc) {
         auto* handler = reinterpret_cast<CppResolveHandlerBase*>(handlerPtr);
+        //printf("in initInstance \n");
         handler->init(resolveFunc, rejectFunc);
     }
     
@@ -452,7 +471,9 @@ public:
     const em::val& _jsRef() const;
     template<typename ...Args>
     em::val callMethod(const std::string& name, Args&&... args) {
+        //printf("callMethod 1\n");
         em::val caller = em::val::module_property("callJsProxyMethod");
+        //printf("callMethod 2\n");
         return caller(_js, name, std::forward<Args>(args)...);
     }
 protected:
@@ -526,6 +547,7 @@ struct JsInterface {
         }
     };
     static em::val _toJs(const std::shared_ptr<I>& c) {
+        //printf("abcdefg \n");
         if (c == nullptr) {
             // null object
             return em::val::undefined();
@@ -542,6 +564,7 @@ struct JsInterface {
     template <typename, typename>
     struct GetOrCreateJsProxy {
         std::shared_ptr<I> operator() (em::val js) {
+            //printf("12345 \n");
             assert(false && "Attempting to pass JS object but interface lacks +w");
             return {};
         }
